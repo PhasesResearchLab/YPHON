@@ -1,13 +1,13 @@
-#!/bin/csh -f
+#!/bin/csh
 #
-# This is A Linux script to collect the force constant matrix from the OUTCAR and CONTCAR files of VASP.5 
-# or the Hessian matrix from the vasprun.xml file of VASP.5. vasp_fij collects the force constants into 
+# This is A Linux script to collect the force constant matrix from the OUTCAR and CONTCAR files of VASP.5
+# or the Hessian matrix from the vasprun.xml file of VASP.5. vasp_fij collects the force constants into
 # the superfij.out file which is the input to Yphon.
-# vasp_fij first checks if the vasprun.xml file exists. If yes, it will call the C++ code vaspfijxml to 
-# convert the Hessian matrix from the vasprun.xml file into the force constant matrix. 
+# vasp_fij first checks if the vasprun.xml file exists. If yes, it will call the C++ code vaspfijxml to
+# convert the Hessian matrix from the vasprun.xml file into the force constant matrix.
 #
-# Usage: vasp_fij [options] 
-# where options can be 
+# Usage: vasp_fij [options]
+# where options can be
 # -conc contcarfile, where contcarfile is the VASP.5 CONTCAR name. The default is CONTCAR
 # -outc outcarfile, where outcarfile is the VASP.5 OUTTCAR name. The default is OUTCAR (canbe gzipped one)
 
@@ -21,8 +21,20 @@ set conc = ""
 set outc = ""
 
 set xml = ""
+set t0 = 0
 if ( -e vasprun.xml ) then
     set xml = "vasprun.xml"
+    set t0 = `stat -c %Y $xml`
+endif
+if ( -e vasprun.xml.gz ) then
+    set t1 = `stat -c %Y vasprun.xml.gz`
+    @ dif =  "$t1" - "$t0"
+    if ( "$dif" > 0 ) then
+      if ( -e vasprun.xml ) then
+        #rm  vasprun.xml
+      endif
+      set xml = "vasprun.xml.gz"
+    endif
 endif
 
 foreach option ( $* )
@@ -59,6 +71,12 @@ foreach option ( $* )
     break
   endif
 end
+
+if ( "$xml" != "" ) then
+  if ( -e $xml ) then
+    set zippedxml = `file $xml | grep "gzip compressed data"`
+  endif
+endif
 
 foreach trycontcar ( $conc CONTCAR.static CONTCAR )
   set contcar=$trycontcar
@@ -106,7 +124,8 @@ else
     head -$last $outcar | tail -5 | head -3 | sed 's/,//g;s/)//g' | awk '{print $4 " " $5 " " $6}' >primcell.tmp
 endif
 
-tail +6 $contcar | head -1 | awk '{for (i=1; i<=NF; i++) print $i}' >! atoms.tmp
+tail +6 $contcar | head -1 | awk '{for (i=1; i<=NF; i++) print $i}' >! _atoms.tmp
+sed "s/\// /g;s/_/ /g"< _atoms.tmp | awk '{print $1}' >atoms.tmp
 tail +7 $contcar | head -1 | awk '{for (i=1; i<=NF; i++) print $i}' >! rep.tmp
 
 
@@ -148,7 +167,11 @@ if ( "$xml" == "" ) then
   @ nline = "$natom" * 3 + 3
   tail +$last $outcar | head -$nline | tail +4 | cut -b 6- >>superfij.out
 else
-  set last = `grep 'hessian' $xml -n -a | tail -1 | awk '{print $1}' | sed 's/://g'`
+  if  ( "$zippedxml" != "" ) then
+    set last = `zcat $xml | grep 'hessian' -n -a | tail -1 | awk '{print $1}' | sed 's/://g'`
+  else
+    set last = `grep 'hessian' $xml -n -a | tail -1 | awk '{print $1}' | sed 's/://g'`
+  endif
   if ( "$last" == "" ) then
     echo "OUTCAR error: CANNOT find line 'hessian' which is the Hessian"
     exit(1)
@@ -156,13 +179,24 @@ else
   @ nline = "$natom" * 3
   @ last = "$last" + 1
   #tail +$last $xml | head -$nline | cut -b 8- | sed "s|<\/v>||g" >superfij.tmp
-  tail +$last $xml | head -$nline | cut -b 8- >superfij.tmp
-  vaspfijxml $natom atoms_rep.tmp superfij.tmp >>superfij.out
+
+  if  ( "$zippedxml" != "" ) then
+    zcat $xml | tail +$last | head -$nline | cut -b 8- >superfij.tmp
+  else
+    tail +$last $xml | head -$nline | cut -b 8- >superfij.tmp
+  endif
+  set get_vasp_version = `where vasp_fij | head -1`
+  set get_vasp_version = $get_vasp_version:h
+  set facvasp6 = `python $get_vasp_version/get_vasp_version.py $xml`
+  if ( "$facvasp6" != "" ) then
+    echo "facvasp6= $facvasp6"
+  endif
+  vaspfijxml $natom atoms_rep.tmp superfij.tmp $facvasp6 >>superfij.out
 #exit
   rm -f superfij.tmp
 endif
 
-rm -f atoms.tmp rep.tmp atoms_rep.tmp pos.tmp
+rm -f _atoms.tmp atoms.tmp rep.tmp atoms_rep.tmp pos.tmp
 
 set last = `grep '  in kB ' $outcar -n -a | tail -1 | awk '{print $1}' | sed 's/://g'`
 if ( "$last" == "" ) then
@@ -172,3 +206,4 @@ if ( "$last" == "" ) then
 endif
 tail +$last $outcar | head -1 | cut -b 9- >>superfij.out
 if ( -e t.m.p.OUTCAR ) rm t.m.p.OUTCAR
+
