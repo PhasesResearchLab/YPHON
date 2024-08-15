@@ -17,7 +17,7 @@ Open the bashrc file:
 
 Update Your PATH environment variable in the bashrc file: 
 
-    export PATH="<path/to/YPHON>:$PATH"
+    export PATH=$PATH:/path/to/YPHON/
 
 Apply the changes:
 
