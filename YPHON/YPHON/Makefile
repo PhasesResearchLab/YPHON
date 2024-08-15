@@ -4,6 +4,7 @@ CC = g++
 
 YGSL = gsl-1.13
 CFLAGS = -Bstatic -O3 -m64 -I ${YGSL}/include -DGSL -Wall -no-pie
+CFLAGS = -Bstatic -O3 -m64 -I ${YGSL}/include -DGSL -Wall -no-pie
 #CFLAGS = -Bstatic -g -m64 -I ${YGSL}/include -DGSL -Wall
 GSLLIB = ${YGSL}/lib
 CLDFLAGS = ${GSLLIB}/libgsl.a ${GSLLIB}/libgslcblas.a -lm
