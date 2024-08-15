@@ -5,7 +5,7 @@ Clone the repository:
 
 Navigate to the YPHON Directory:
 
-    cd YPHON
+    cd YPHON/YPHON/YPHON
 
 Compile the source code:
 
