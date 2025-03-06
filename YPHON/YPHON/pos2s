@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/csh -f
 #
 # A Linux script for making the symmetry.mode file for the vibrational mode analysis, in terms of 
 # irreducible representations by group theory, for phonons at the Gamma point, and the Rotation.sym 
@@ -121,14 +121,12 @@ awk '{print $1,$2,$3,$4,$5}' postion.tmp  >>$smodesfile
 awk '{print $1,$2,$3,$4,$5}' postion.tmp  >>vectorabc.tmp
 
 echo "1"  >>$smodesfile
-#echo "GM DT" >>$smodesfile
-echo "GM" >>$smodesfile
+echo "GM DT" >>$smodesfile
 
 awk -F\\n "/_space_group_symop_operation_xyz/,/loop_/" $symfile | grep -v "_space_group_symop_operation_xyz" | grep -v "loop_" > rotation.tmp
 
 smodes <$smodesfile >$smodesout
 Ymode <$smodesout -atom "$atom" -POSCAR $posfile $RV
-#exit
 
 grep "Space Group"  findsym.log
 echo ""
