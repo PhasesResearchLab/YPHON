@@ -107,7 +107,8 @@ if ( "$last" == "" ) then
   endif
 endif
 #set nline = `ari -n -f %.0f $natom x 4 + 2`
-set nline = `calc $natom \* 4 + 2`
+@ nline = $natom * 4 + 2
+#set nline = `calc $natom \* 4 + 2`
 #@ nline = "$natom" \* 4 + 2
 tail +$last $outcar | head -$nline | tail +3 >> dielecfij.out
 
