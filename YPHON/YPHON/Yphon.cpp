@@ -5065,7 +5065,7 @@ printf("why sqs compare = %d, ii=%d, natomP=%d\n", sqs, ii, natomP);
 	    }
 	    }
 	    	if (!silent) {
-		    printf("%12d out of %d Frequencied calculated! ", 
+		    printf("%12d out of %d Frequencies calculated! ", 
 			LatDYN::Nfreq, freqN);
 	            cputim->elptime(stdout);
 		}
