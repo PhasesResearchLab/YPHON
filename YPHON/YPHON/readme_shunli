@@ -1,0 +1,55 @@
+* Used to list the symmetry from Yphon
+* check the file: findsym.log 
+
+pos2s -THR 1e-3 Symmetry.pos
+Yphon -bvec -thr2 0.01 -plot  < superfij.out -Gfile symmetry.mode
+
+
+Yphon -bvec -thr2 0.01 -plot -pdis dis62n -reddm -Born dielecfij.out < superfij.out 
+
+Yphon -bvec -thr2 0.01 -plot -reddm -pdis dis62 -tranI 2
+
+ Yphon -bvec -thr2 0.01 -plot -reddm -pdis dis15 -Born dielecfij.out -tranI 2 -ndisq 2 
+ Yphon -bvec -thr2 0.01 -plot -reddm -tranI 2 -pvdos
+--------------------
+Yphon -Born ../../../ordered/dielecfij.out -thr2 0.10 -mall -Mass mass.1
+
+
+--------------
+note: may delete " -bvec -thr2 0.01"  ??? 
+
+iiiiiiiiiiiiii
+
+cp Symmetry.pos test.pos  ||  change lattice vector to correct one, reduce some
+ vi dielecfij.out   ||  change lattice vector to the same as test.pos
+pos2s test.pos
+ 
+
+Yphon -plot -Born dielecfij.out -Gfile symmetry.mode -pdis disdis -bvec -thr2 0.01 < superfij.out
+
+-----------
+ Yphon -plot -Born dielecfij.out -Gfile symmetry.mode -reddm -tranI 2 -pvdos -bvec -thr2 0.01 < superfij.out 
+
+partial DOS 
+
+1-frequency, 2-total-DOS, 3x2-totalDOS with newtron section difference, 4 xx, 5-end: each atoms 
+
+**********************************
+ADD on 2016-04-27: for YphonP 
+
+
+YphonP_new -Amode 0.05 -tranI 2  -plot < superfij.out -nq 10 10 10 -plot -DebCut 0.5
+
+Amode: along the most imgaginary direction move the atomic position by 0.05 A, for all possible imaginary atoms
+tranI:  center symmetry, make gamma point to zero
+DebCut:  0.5 : Debye cut, make the frequency below 0.5THz smooth by fitting. 
+
+********************************
+ADD 2018-08-27
+change superfijxxx file to change the new primitive cell  
+add "-Rfile Rotation.sym" to add the Rotation symmetry to adjust some frequencies to equal
+such as:
+Yphon -plot  < superfij.new -Gfile symmetry.mode -Rfile Rotation.sym
+
+
+

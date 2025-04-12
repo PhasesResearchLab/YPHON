@@ -1,0 +1,24 @@
+#!/bin/bash
+echo 'check and delete files: IF yes, input a positive number; IF no, input a negative number'
+read -p "NOW, input a positive or a negative number: " aa 
+
+
+for i in `ls | grep vol_`; do cd $i; echo $i; 
+
+ if [ -f asdf ]; then
+   rm asdf
+ fi
+
+grep THz OUTCAR | tail -n 5 | tee asdf 
+
+ if [ $aa -gt 0 ] && [ -s asdf ]; then
+ echo 'OK run ...' 
+ vasp_fij
+ tar -czf OUTCAR.tar.gz OUTCAR
+ rm OUTCAR
+ tar -czf vasprun.tar.gz vasprun.xml
+ rm vasprun.xml 
+fi 
+
+cd ..; done
+

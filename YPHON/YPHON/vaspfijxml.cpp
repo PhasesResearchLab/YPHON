@@ -100,6 +100,11 @@ int main(int argc, char* argv[])
     }
     fclose (cfp);
 
+    double facvasp6 = 1.0;
+    if ( argc > 4 ) {
+	    facvasp6 = atof(argv[4]);
+    }
+
     cfp = fopen(argv[3], "r");
     for (int i=0; i<natom; i++) {
 	//printf ( "%d\n", i);
@@ -112,7 +117,7 @@ int main(int argc, char* argv[])
 		double hij;
 		for (int jj=0; jj<3; jj++) {
 		     foo = fscanf (cfp, "%lf", &hij);
-		     printf (" %.8lg", hij*fac);
+		     printf (" %.8lg", hij*fac*facvasp6);
 		}
 	    }
 	    char tmp[80];
